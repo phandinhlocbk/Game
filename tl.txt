@@ -1,0 +1,676 @@
+			
+//============================================================================
+
+//============================================================================
+
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+#define ADJCENT_T 1
+#define ADJCENT_L 2
+#define ADJCENT_B 3
+#define ADJCENT_R 4
+
+#define SUCCESS 0
+#define FAIL -1
+
+
+//////////////////////////////////////////////////////////
+// Functions definitions								//
+//////////////////////////////////////////////////////////
+
+// read initial input
+int read_input(char* filename, char** & gameboard, int& m, int& n);
+
+// write user result to file
+int write_output(char* filename, int score, char** gameboard, int n);
+
+// write current game status to an output stream
+int write_gameboard(ostream &out, char** & gameboard);
+int a=0,b=0,c=0,d=0;
+
+int k,h,q;
+int dinh[30][30],loc[30][30],phan[30][30];
+int kiemtrahang(int hang);
+int kiemtracot(int hang);
+int xoahang(int k, int b, int a, int cao);
+int xoacot(int h,int c,int q,int cao);
+int xoahangtoanbo(int hang,int cao);
+int xoacottoanbo(int hang,int cao);
+int loctoanbo(int hang ,int cot);
+int xoacotphu(int hang,int cao);
+
+
+//////////////////////////////////////////////////////////
+// Global variables										//
+//////////////////////////////////////////////////////////
+
+// width and height of matrices
+int m, n;
+int diem1=0,diem2=0,diemphu=0;
+
+//int tinhdiem3,tinhdiem4,tinhdiem5;
+
+char trunggian;
+// game board
+char** gameboard;
+
+// program entry
+int main() {
+
+	// game result
+	int score;
+
+	// read input file
+	read_input("D:\\input.txt", gameboard, m, n);
+
+	// process
+	score = 0;
+
+	do {
+		// user input
+		int x, y, t;
+		//trung=t;
+		char T,trunggian;
+
+		write_gameboard(cout, gameboard);
+		cin >> x >> y >> T;
+
+		// exit condition
+		if (x == -1 && y == -1 && T == 'A')
+			break;
+
+		t = 0;
+		switch (T) {
+		case 'T':
+			t = ADJCENT_T;
+			break;
+		case 'B':
+			t = ADJCENT_B;
+			break;
+		case 'L':
+			t = ADJCENT_L;
+			break;
+		case 'R':
+			t = ADJCENT_R;
+			break;
+		default:
+			// error
+			break;
+		}
+		
+////////////////////////////////////////
+
+{	
+	if((t==1))
+		{
+			
+			trunggian=gameboard[x][y];
+			gameboard[x][y]=gameboard[x+1][y];
+			gameboard[x+1][y]=trunggian;
+			kiemtracot(n);
+			kiemtrahang(n);
+			xoahangtoanbo(n,m);
+			xoacottoanbo(n,m);
+			xoacotphu(n,m);
+			loctoanbo(n,m);
+			if((diem1+diem2)==0) 
+				  {
+					 trunggian=gameboard[x][y];
+					gameboard[x][y]=gameboard[x+1][y];
+					gameboard[x+1][y]=trunggian;
+					  
+				 }
+				
+			  
+		}
+	else if((t==3))
+		{
+		
+			trunggian=gameboard[x][y];
+			gameboard[x][y]=gameboard[x-1][y];
+			gameboard[x-1][y]=trunggian;
+			kiemtracot(n);
+			kiemtrahang(n);
+			xoahangtoanbo(n,m);
+			xoacottoanbo(n,m);
+			xoacotphu(n,m);
+			loctoanbo(n,m);
+				if((diem1+diem2)==0) 
+				{
+					trunggian=gameboard[x][y];
+				gameboard[x][y]=gameboard[x-1][y];
+				gameboard[x-1][y]=trunggian;
+					
+				}
+			
+
+		}
+	else if((t==2))
+		{
+			
+			trunggian=gameboard[x][y];
+			gameboard[x][y]=gameboard[x][y-1];
+			gameboard[x][y-1]=trunggian;
+			kiemtracot(n);
+			kiemtrahang(n);
+			xoahangtoanbo(n,m);
+			xoacottoanbo(n,m);
+			xoacotphu(n,m);
+			loctoanbo(n,m);
+			if((diem1+diem2)==0) 
+				{
+					trunggian=gameboard[x][y];
+				gameboard[x][y]=gameboard[x][y-1];
+				gameboard[x][y-1]=trunggian;
+					
+				}
+		
+		}
+	else if((t==4))
+		{
+			
+		trunggian=gameboard[x][y];
+			gameboard[x][y]=gameboard[x][y+1];
+			gameboard[x][y+1]=trunggian;
+			kiemtracot(n);
+			kiemtrahang(n);
+			xoahangtoanbo(n,m);
+			xoacottoanbo(n,m);
+			xoacotphu(n,m);
+			loctoanbo(n,m);
+			 if((diem1+diem2)==0) 
+				  {
+					 trunggian=gameboard[x][y];
+					gameboard[x][y]=gameboard[x][y+1];
+					gameboard[x][y+1]=trunggian;
+					  
+				 }
+		
+		
+		}
+	
+		
+			kiemtracot(n);
+			kiemtrahang(n);
+			xoahangtoanbo(n,m);
+			xoacottoanbo(n,m);
+			xoacotphu(n,m);
+			loctoanbo(n,m);
+			score=diemphu+diem1+diem2;
+			
+	
+}
+
+
+
+/////////////////////////////////////
+					
+
+	} while (true);
+
+	// save user result to file
+	write_output("D:\\output.txt", score, gameboard, n);
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////
+// Functions implement									//
+//////////////////////////////////////////////////////////
+
+int read_input(char* filename, char** & gameboard, int& m, int& n) {
+
+	// open file to read
+	ifstream fin(filename);
+
+	// read column and row
+	fin >> n >> m;
+
+	// read initial gameboard
+	gameboard = new char*[m];
+	for (int i = 0; i < m; i++) {
+		gameboard[i] = new char[n];
+		for (int j = 0; j < n; j++)
+			fin >> gameboard[i][j];
+	}
+	fin.close();
+
+	return SUCCESS;
+}
+
+int write_output(char* filename, int score, char** gameboard, int n) {
+	// open file for output
+	ofstream fout(filename);
+
+	// write score
+	fout << score << endl;
+
+	// write final gameboard
+	write_gameboard(fout, gameboard);
+
+	// close file
+	fout.close();
+
+	return SUCCESS;
+}
+
+int write_gameboard(ostream &out, char** & gameboard) {
+	for (int row=n-1; row>=0; row--) {
+		for (int col =0; col <n; col++)
+			out << gameboard[row][col] << " ";
+		out << endl;
+	}
+	return SUCCESS;
+}
+int kiemtrahang(int hang)
+{
+
+	
+	for (int i=0;i<hang;i++)
+		{
+												a=0;
+												for(int j=0;j<hang-1;j++)
+													{
+													  if (gameboard[i][j]==gameboard[i][j+1])
+													  {
+														a=a+1;
+														b=j;
+														k=i;
+													  }
+				
+					
+													}
+		
+		
+	
+	{
+	if (a==4)
+		{
+			diem1=diem1+20;
+
+			for(int j=(b+1);j>(b-a);j--)
+			{	c=0;
+			loc[i][j]=1;
+							{
+				 			for( int i1=0;i1<hang-1;i1++)
+								{
+								if (gameboard[i1][j]==gameboard[i1+1][j])
+								{
+								c=c+1;
+								d=i1+1;
+								}
+								}
+							}
+				
+			if ((c==2)||(c==3)||(c==4))
+			{
+			int i2=d-c;
+			{
+				
+			  
+				{
+					if (gameboard[i][j]==gameboard[i2][j])
+					{
+						if ((i<=d)&&(i>=(d-c)))
+							{
+							if (c==2) {diemphu=5;  phan[i2][j]=2;phan[i2+1][j]=2;phan[i2+2][j]=2;}
+							if (c==3) {diemphu=4; phan[i2][j]=2; phan[i2+1][j]=2; phan[i2+2][j]=2; phan[i2+3][j]=2;}
+							if (c==4) {diemphu=-4; phan[i2][j]=2; phan[i2+1][j]=2;  phan[i2+2][j]=2; phan[i2+3][j]=2; phan[i2+4][j]=2;}
+							}
+						else if(((i+1)==(d-c))||((i-1)==d))
+							{
+							if (c==2) {diemphu=9;  phan[i2][j]=2;phan[i2+1][j]=2;phan[i2+2][j]=2;}
+							if (c==3) {diemphu=8;  phan[i2][j]=2; phan[i2+1][j]=2; phan[i2+2][j]=2; phan[i2+3][j]=2;}
+							if (c==4) {diemphu=0; phan[i2][j]=2; phan[i2+1][j]=2;  phan[i2+2][j]=2; phan[i2+3][j]=2; phan[i2+4][j]=2;}
+							}
+					}
+					else diemphu=0;
+				}
+			}
+			}
+			else diemphu=0;
+				diem1+=diemphu;
+				
+		}
+	}
+	if(a==3)
+		{
+			diem1=diem1+8;
+			for (int j=(b+1);j>(b-a);j--)
+				{
+				loc[i][j]=1;
+					{
+						c=0;
+				 	for( int i1=0;i1<hang-1;i1++)
+						{
+						if (gameboard[i1][j]==gameboard[i1+1][j])
+						{
+						c=c+1;
+						d=i1+1;
+						}
+						
+						}
+					}
+				
+			
+		
+			if((c==2)||(c==3)||(c==4))
+			{ 
+			int i2=d-c;
+			{
+				
+				{
+					if (gameboard[i][j]==gameboard[i2][j])
+					{
+						
+						if ((i<=d)&&(i>=(d-c)))
+							{
+								
+							
+							if (c==2){ diemphu=1;  phan[i2][j]=2;phan[i2+1][j]=2;phan[i2+2][j]=2;}
+							if (c==3) {diemphu=-2;  phan[i2][j]=2; phan[i2+1][j]=2; phan[i2+2][j]=2; phan[i2+3][j]=2;}
+							if (c==4) {diemphu=4;   phan[i2][j]=2; phan[i2+1][j]=2;  phan[i2+2][j]=2; phan[i2+3][j]=2; phan[i2+4][j]=2;}
+							}
+						else if(((i+1)==(d-c))||((i-1)==d))
+							{
+								if (c==2) {diemphu=3;  phan[i2][j]=2;phan[i2+1][j]=2;phan[i2+2][j]=2;}
+								if (c==3) {diemphu=0;   phan[i2][j]=2; phan[i2+1][j]=2; phan[i2+2][j]=2; phan[i2+3][j]=2;}
+								if (c==4) {diemphu=8;  phan[i2][j]=2; phan[i2+1][j]=2;  phan[i2+2][j]=2; phan[i2+3][j]=2; phan[i2+4][j]=2;}
+							}
+					}
+					else diemphu=0;
+				}
+
+			}
+			}
+			else diemphu=0;
+			diem1+=diemphu;
+			
+		}
+			
+			}
+		
+	if(a==2)
+		{	
+			int l;
+			diem1=diem1+3;
+			
+			for(int j=(b+1);j>(b-a);j--)
+			{
+				loc[i][j]=1;
+					
+				c=0;
+				 for( int i1=0;i1<hang-1;i1++)
+						{
+						if (gameboard[i1][j]==gameboard[i1+1][j])
+						{
+						c=c+1;
+						d=i1+1;
+						l=j;
+						
+						}
+						
+						}
+				
+					
+			
+			if((c==2)||(c==3)||(c==4))
+			{
+			int i2=d-c;
+			{
+			 
+				{
+					if (gameboard[i][j]==gameboard[i2][j])
+					{	
+						if ((i<=d)&&(i>=(d-c)))
+							{
+								
+							if (c==2) {diemphu=-1;  phan[i2][j]=2;phan[i2+1][j]=2;phan[i2+2][j]=2;}
+							if (c==3) {diemphu=1;  phan[i2][j]=2; phan[i2+1][j]=2; phan[i2+2][j]=2; phan[i2+3][j]=2; }
+							if (c==4) {diemphu=5; phan[i2][j]=1; phan[i2+1][j]=2;  phan[i2+2][j]=2; phan[i2+3][j]=2; phan[i2+4][j]=2; }
+							
+							}
+						else if(((i+1)==(d-c))||((i-1)==d))
+							{
+								if (c==2) {diemphu=0;  phan[i2][j]=2;phan[i2+1][j]=2;phan[i2+2][j]=2;}
+								if (c==3) {diemphu=3;  phan[i2][j]=2; phan[i2+1][j]=2; phan[i2+2][j]=2; phan[i2+3][j]=2;}
+								if (c==4) {diemphu=9;  phan[i2][j]=2; phan[i2+1][j]=2;  phan[i2+2][j]=2; phan[i2+3][j]=2; phan[i2+4][j]=2;}
+							}
+					}
+					else diemphu=0;
+				}
+			}
+			
+			}
+			else diemphu=0;
+			diem1+=diemphu;
+			
+		}
+			
+	}
+	}
+}
+return SUCCESS;
+	}
+///////////////////////////////////////
+int kiemtracot(int hang)
+{
+			for(int j=0;j<hang;j++)
+					{
+						c=0;
+								 for( int i=0;i<hang-1;i++)
+									{
+						
+										if (gameboard[i][j]==gameboard[i+1][j])
+										{
+										c=c+1;
+										d=i;
+										h=i;
+										q=j;
+										}
+									}
+					if (c==4)
+						{
+							diem2=diem2+20;
+
+							for(int i1=(d+1);i1>(d-c);i1--)
+								dinh[i1][j]=1;
+						}
+							if(c==3)
+								{
+									diem2=diem2+8;
+
+									for(int i1=(d+1);i1>(d-c);i1--)
+										dinh[i1][j]=1;
+								}
+							if(c==2)
+								{
+									diem2=diem2+3;
+
+									for(int i1=(d+1);i1>(d-c);i1--)
+										dinh[i1][j]=1;
+								}	
+		}
+return SUCCESS;
+}
+//////////////////////////////////
+
+int xoahang(int k, int b, int a, int cao)
+	{
+		for (int j=(b);j<=(b+a);j++)
+		{
+			for (int i=k;i<cao-k-1;i++)
+				gameboard[i][j]=gameboard[i+1][j];
+		}
+	return SUCCESS;
+	}
+int xoacot(int h,int c,int q,int cao)
+	{
+		if (h==0)
+			{
+				for (int i=(h);i<cao-c-h-1;i++)
+				gameboard[i][q]=gameboard[i+c+1][q];
+			}
+		else
+			{
+				for (int i=(h);i<cao-c-h;i++)
+				gameboard[i][q]=gameboard[i+c+1][q];
+			}
+		return SUCCESS;
+	}
+/*int xoatoanbo(int hang,int cao)
+	{
+		
+				
+						for(int i1=0;i1<n;i1++)
+						{
+							for( int j1=0;j1<n;j1++)
+							{					
+										if((loc[i1][j1]==1))
+									
+										{
+											loc[i1][j1]=0;
+										
+											xoahang( i1, j1,  a, cao);
+										}
+								}
+							}
+					
+						
+		return SUCCESS;
+}*/
+int xoacottoanbo(int hang,int cao)
+{
+			for(int j=0;j<hang;j++)
+					{
+						c=0;
+							 for( int i=0;i<hang-1;i++)
+								{
+						
+									if (gameboard[i][j]==gameboard[i+1][j])
+									{
+									c=c+1;
+									d=i;
+									h=i;
+									q=j;
+									}
+								}
+			
+				
+				 {
+					if (c==4)
+						{
+														{
+															int i1=d-c+1;
+																xoacot(i1,c,j,cao);													
+										
+														}
+												
+							
+						}
+					if(c==3)
+								{
+														{
+															int i1=d-c+1;
+																xoacot(i1,c,j,cao);													
+										
+														}
+													
+						
+								}
+					if(c==2)
+								{
+										
+														{
+															int i1=d-c+1;
+																xoacot(i1,c,j,cao);													
+										
+														}
+													
+								
+												
+								}	
+				 }
+		}
+return SUCCESS;
+}
+int loctoanbo(int hang ,int cot)
+{
+	for (int i=0;i<n;i++)
+	{
+			for( int j=0;j<n;j++)
+													{
+														dinh[i][j]=0;
+														phan[i][j]=1;
+													}
+	}
+	return SUCCESS;
+}
+int xoahangtoanbo(int hang,int cao)
+{
+	for (int i=hang;i>=0;i--)
+		{	int j;
+			a=0;
+			for(int j=0;j<hang-1;j++)
+				{
+				  if (gameboard[i][j]==gameboard[i][j+1])
+				  {
+					a=a+1;
+					b=j;
+					k=i;
+				  }	
+				}
+		
+	
+		if (a==4)
+						{
+							j=b-a+1;
+							xoahang(k, j, a,cao);
+
+						}
+		if(a==3)
+						{
+							
+							j=b-a+1;
+							xoahang(k, j, a,cao);
+						}
+		if(a==2)
+						{
+							j=b-a+1;
+							xoahang(k, j, a,cao);
+						}
+	}
+	return SUCCESS;
+}
+int xoacotphu(int hang,int cao)
+{	
+	for(int j=0;j<hang;j++)
+	{	c=0;
+		for(int i=0;i<hang;i++)
+		{
+			
+			{
+			if (phan[i][j]==2)
+			{
+				c=c+1;
+				d=j;
+				a=i;
+				
+			}
+			}
+		
+		}
+		
+	//cout<<"\n c la"<<c<<a;
+	if ((c==3)||(c==4)||(c==5))
+				{	int k=c-1;
+					xoacot((a-d),k-1, d,cao);
+				}
+	
+	
+	}
+	return SUCCESS;
+}
